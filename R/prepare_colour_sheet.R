@@ -1,10 +1,11 @@
 #' Prepare colour sheet
 #' @description Prepares the visual appearance matrix for automated Smallset
 #'   selection.
-#' @keywords internal
+#' @noRd
 
 prepare_colour_sheet <- function(smallsetList,
-                                 fourCols) {
+                                 fourCols,
+                                 ignoreCols) {
   first <- smallsetList[[1]]
   first[] <- lapply(first, as.character)
   
@@ -62,12 +63,24 @@ prepare_colour_sheet <- function(smallsetList,
   }
   
   colours <- last
-  colours[,] <- fourCols[1]
+  colours[,] <- fourCols[4]
+  colours <- colours[,!colnames(colours) %in% ignoreCols]
   
   # Find data changes between snapshots
   tables <- find_data_changes(smallsetList, fourCols, FALSE)
+  # Remove ignored columns
+  if (!is.null(ignoreCols)) {
+    for (t in 1:length(tables[[1]])) {
+      ignore <-
+        ignoreCols[ignoreCols %in% colnames(tables[[1]][[t]]$body$dataset)]
+      if (length(ignore) > 0) {
+        tables[[1]][[t]] <-
+          delete_columns(tables[[1]][[t]], j = ignore)
+      }
+    }
+  }
   tables <-
-    lapply(seq(1:length(tables[[1]])), tables, FUN = retrieve_tables)
+    lapply(seq(1:length(tables[[1]])), tables, ignoreCols, FUN = retrieve_tables)
   
   # Update colours in visual appearance matrix
   for (t in 1:length(tables)) {
@@ -77,7 +90,7 @@ prepare_colour_sheet <- function(smallsetList,
     for (i in rownames(t_colours)) {
       for (j in colnames(t_colours)) {
         c1 <- t_colours[i, j]
-        if (c1 != fourCols[1]) {
+        if (c1 != fourCols[4]) {
           colours[i, j] <- c1
         }
       }

@@ -1,6 +1,6 @@
 #' Run simple gurobi
 #' @description Runs the coverage optimisation problem.
-#' @keywords internal
+#' @noRd
 
 run_simple_gurobi <-
   function(data,
@@ -43,8 +43,8 @@ run_simple_gurobi <-
     
     # Format model result
     modelSelect <- result$x
-    rowNums <- data.frame(rows = rownames(data), modelSelect)
-    rowNums <- subset(rowNums, rowNums$modelSelect == 1)$rows
+    rowIDs <- data.frame(rows = rownames(data), modelSelect)
+    rowIDs <- subset(rowIDs, rowIDs$modelSelect == 1)$rows
     
-    return(rowNums)
+    return(rowIDs)
   }

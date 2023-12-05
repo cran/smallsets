@@ -1,7 +1,7 @@
 #' Build plot
 #' @description Builds snapshot and resume marker plots.
 #' @import ggplot2
-#' @keywords internal
+#' @noRd
 
 build_plot <-
   function(itemNum,
@@ -18,7 +18,8 @@ build_plot <-
            smallsetTables,
            spacing,
            font,
-           truncateData) {
+           truncateData,
+           align) {
     # Initialise variables
     colValue <- NULL
     colValue2 <- NULL
@@ -39,14 +40,14 @@ build_plot <-
       data.frame(ind = colnames(tab1), x = seq(1, length(colnames(tab1)), 1))
     
     # Assign coordinates to tile colours
-    tab1$y <- seq(nrow(tab1), 1, -1)
+    tab1$y <- seq(nrow(tab1), 1,-1)
     tab1Long <-
       suppressWarnings(cbind(tab1[ncol(tab1)], utils::stack(tab1[-ncol(tab1)])))
     tab1Long <- merge(tab1Long, xs)
     colnames(tab1Long) <- c("variable", "y", "colValue", "x")
     
     # Assign coordinates to tile data
-    tab2$y <- seq(nrow(tab2), 1, -1)
+    tab2$y <- seq(nrow(tab2), 1,-1)
     tab2Long <-
       suppressWarnings(cbind(tab2[ncol(tab2)], utils::stack(tab2[-ncol(tab2)])))
     tab2Long <- merge(tab2Long, xs)
@@ -86,13 +87,13 @@ build_plot <-
     }
     
     # Prepare lighter colour values for tiles with missing data
+    missingCols <- colorspace::lighten(fourCols, .4)
     if (isTRUE(missingDataTints)) {
       tabs$colValue <-
         ifelse(is.na(tabs$datValue),
                colorspace::lighten(tabs$colValue, .4),
                tabs$colValue)
       
-      missingCols <- colorspace::lighten(fourCols, .4)
       legendDF <-
         rbind(legendDF,
               data.frame(colValue = missingCols, description = ""))
@@ -122,22 +123,31 @@ build_plot <-
         as.character(unique(subset(tabs, variable == v)$colValue))
       uniCols <-
         uniCols[!is.na(uniCols) &
-                  (uniCols %in% unique(legendDF$colValue))]
+                  (uniCols %in% c(unique(legendDF$colValue), missingCols))]
+      uniCols <- ifelse(uniCols == missingCols[1], fourCols[1], uniCols)
+      uniCols <- ifelse(uniCols == missingCols[2], fourCols[2], uniCols)
+      uniCols <- ifelse(uniCols == missingCols[3], fourCols[3], uniCols)
+      uniCols <- ifelse(uniCols == missingCols[4], fourCols[4], uniCols)
+      uniCols <- unique(uniCols)
       if (length(uniCols) > 0) {
         if (sum(length(uniCols) == 1 &
-                uniCols == accents$colValue[3]) == 1) {
-          colNameCols[colNameCols$ind == v, c("col")] <- accents$colValue2[3]
-        } else if (sum(length(uniCols) == 1 &
-                       uniCols == accents$colValue[4]) == 1) {
-          colNameCols[colNameCols$ind == v, c("col")] <- accents$colValue2[4]
-        } else {
+                uniCols == accents$colValue[1]) == 1) {
           colNameCols[colNameCols$ind == v, c("col")] <- accents$colValue2[1]
+        } else if (sum(length(uniCols) == 1 &
+                       uniCols == accents$colValue[2]) == 1) {
+          colNameCols[colNameCols$ind == v, c("col")] <- accents$colValue2[2]
+        } else {
+          colNameCols[colNameCols$ind == v, c("col")] <- accents$colValue2[4]
         }
       } else {
         colNameCols[colNameCols$ind == v, c("col")] <- "#FFFFFF"
       }
     }
     xs <- merge(xs, colNameCols)
+    
+    if (angleVal > 0 & angleVal <= 90) {
+      xs$x <- xs$x - .25
+    }
     
     # Create snapshot plot
     snapshot <- ggplot() +
@@ -169,30 +179,67 @@ build_plot <-
         vjust = vjustVal
       ) +
       scale_colour_identity() +
-      coord_equal() +
-      theme(
-        axis.line = element_blank(),
-        axis.text.x = element_blank(),
-        axis.text.y = element_blank(),
-        axis.ticks = element_blank(),
-        axis.title.x = element_blank(),
-        axis.title.y = element_blank(),
-        panel.background = element_blank(),
-        legend.title = element_blank(),
-        legend.title.align = 0.5,
-        legend.margin = margin(
-          t = 0,
-          r = 0,
-          b = 0,
-          l = 0,
-          unit = 'cm'
-        ),
-        text = element_text(
-          family = font,
-          size = sizing$legend,
-          colour = "black"
+      coord_equal()
+    
+    # Set legend title for missing data
+    if (isTRUE(missingDataTints)) {
+      snapshot <- snapshot +
+        guides(
+          fill = guide_legend(title = "*A lighter value indicates a missing data value",
+                              title.position = "bottom")
+        ) +
+        theme(
+          axis.line = element_blank(),
+          axis.text.x = element_blank(),
+          axis.text.y = element_blank(),
+          axis.ticks = element_blank(),
+          axis.title.x = element_blank(),
+          axis.title.y = element_blank(),
+          panel.background = element_blank(),
+          legend.title = element_text(size = (sizing$legend * .75)),
+          legend.title.align = 0.5,
+          legend.margin = margin(
+            t = 0,
+            r = 0,
+            b = 0,
+            l = 0,
+            unit = "pt"
+          ),
+          plot.margin = margin(0, 0, 0, 0, "cm"),
+          text = element_text(
+            family = font,
+            size = sizing$legend,
+            colour = "black"
+          )
         )
-      )
+    } else {
+      snapshot <- snapshot +
+        theme(
+          axis.line = element_blank(),
+          axis.text.x = element_blank(),
+          axis.text.y = element_blank(),
+          axis.ticks = element_blank(),
+          axis.title.x = element_blank(),
+          axis.title.y = element_blank(),
+          panel.background = element_blank(),
+          legend.title = element_blank(),
+          legend.title.align = 0.5,
+          legend.margin = margin(
+            t = 0,
+            r = 0,
+            b = 0,
+            l = 0,
+            unit = "cm"
+          ),
+          plot.margin = margin(0, 0, 0, 0, "cm"),
+          text = element_text(
+            family = font,
+            size = sizing$legend,
+            colour = "black"
+          )
+        )
+    }
+    
     
     # Print data in Smallset snapshots
     if (isTRUE(printedData)) {
@@ -240,8 +287,8 @@ build_plot <-
             y = .5,
             yend = (maxDims[2] + .5)
           ),
-          colour = accents$colValue2[1],
-          size = sizing$resume
+          colour = accents$colValue2[4],
+          linewidth = sizing$resume
         ) +
         coord_equal() +
         theme_void()

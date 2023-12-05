@@ -1,36 +1,46 @@
 #' Write add colour
 #' @description Writes about the add colour.
-#' @keywords internal
-write_colourAdd <- function(colourAdd) {
-  txt <- paste0("Data additions are represented with the colour ",
-                colourAdd,
+#' @noRd
+write_colourAdded <- function(colourAdded) {
+  txt <- paste0("Data additions are ",
+                colourAdded,
                 ".")
   return(txt)
 }
 
 #' Write delete colour
 #' @description Writes about the delete colour.
-#' @keywords internal
-write_colourDelete <- function(colourDelete) {
-  txt <- paste0("Data deletions are represented with the colour ",
-                colourDelete,
+#' @noRd
+write_colourDeleted <- function(colourDeleted) {
+  txt <- paste0("Data deletions are ",
+                colourDeleted,
                 ".")
   return(txt)
 }
 
 #' Write edit colour
 #' @description Writes about the edit colour.
-#' @keywords internal
-write_colourEdit <- function(colourEdit) {
-  txt <- paste0("Data edits are represented with the colour ",
-                colourEdit,
+#' @noRd
+write_colourEdited <- function(colourEdited) {
+  txt <- paste0("Data edits are ",
+                colourEdited,
+                ".")
+  return(txt)
+}
+
+#' Write unchanged colour
+#' @description Writes about the unchanged colour.
+#' @noRd
+write_colourUnchanged <- function(colourUnchanged) {
+  txt <- paste0("Unchanged data is ",
+                colourUnchanged,
                 ".")
   return(txt)
 }
 
 #' Write column additions
 #' @description Writes about column additions.
-#' @keywords internal
+#' @noRd
 write_columnsAdd <- function(columnsAdd, colourAdd) {
   if (length(columnsAdd) == 1) {
     txt <- paste0("Column ",
@@ -62,7 +72,7 @@ write_columnsAdd <- function(columnsAdd, colourAdd) {
 
 #' Write row additions
 #' @description Writes about row additions.
-#' @keywords internal
+#' @noRd
 write_rowsAdd <- function(rowsAdd, colourAdd) {
   if (length(rowsAdd) == 1) {
     txt <- paste0(as.character(length(rowsAdd)),
@@ -80,11 +90,11 @@ write_rowsAdd <- function(rowsAdd, colourAdd) {
 
 #' Write column names
 #' @description Writes about the column names.
-#' @keywords internal
+#' @noRd
 write_columnNames <- function(columnNames) {
   if (length(columnNames) == 2) {
     txt <- paste0(
-      "The columns, in order from left to right, are: ",
+      "The columns, in order from left to right, are ",
       columnNames[1],
       " and ",
       columnNames[2],
@@ -92,7 +102,7 @@ write_columnNames <- function(columnNames) {
     )
   } else {
     txt <- paste0(
-      "The columns, in order from left to right, are: ",
+      "The columns, in order from left to right, are ",
       paste(columnNames[1:(length(columnNames) - 1)], collapse = ", "),
       ", and ",
       columnNames[length(columnNames)],
@@ -104,7 +114,7 @@ write_columnNames <- function(columnNames) {
 
 #' Write column deletions
 #' @description Writes about column deletions.
-#' @keywords internal
+#' @noRd
 write_columnsDelete <- function(columnsDelete, colourDelete) {
   if (length(columnsDelete) == 1) {
     txt <- paste0("Column ",
@@ -136,7 +146,7 @@ write_columnsDelete <- function(columnsDelete, colourDelete) {
 
 #' Write row deletions
 #' @description Writes about row deletions.
-#' @keywords internal
+#' @noRd
 write_rowsDelete <- function(rowsDelete, colourDelete) {
   if (length(rowsDelete) == 1) {
     txt <- paste0(as.character(length(rowsDelete)),
@@ -154,7 +164,7 @@ write_rowsDelete <- function(rowsDelete, colourDelete) {
 
 #' Write cell edits
 #' @description Writes about cell edits.
-#' @keywords internal
+#' @noRd
 write_cellsEdit <- function(cellsEdit, colourEdit) {
   if (length(cellsEdit) == 1) {
     txt <- paste0(as.character(length(cellsEdit)),
@@ -172,18 +182,18 @@ write_cellsEdit <- function(cellsEdit, colourEdit) {
 
 #' Write caption
 #' @description Writes about the snapshot caption.
-#' @keywords internal
+#' @noRd
 write_caption <- function(caption) {
-  txt <- paste0("The caption is quote ",
+  txt <- paste0("The caption says ",
                 caption,
-                " unquote."
+                "."
                 )
   return(txt)
 }
 
 #' Write dimensions
 #' @description Writes about the snapshot dimensions.
-#' @keywords internal
+#' @noRd
 write_dimensions <- function(i, tables) {
   txt <- paste0("Snapshot ",
                 i,
@@ -197,12 +207,28 @@ write_dimensions <- function(i, tables) {
 
 #' Write snapshots
 #' @description Writes about the number of snapshots.
-#' @keywords internal
+#' @noRd
 write_snapshots <- function(tables) {
-  txt <- paste0("The Smallset Timeline contains ",
-                as.character(length(tables)),
-                " Smallset snapshots."
-                )
+  txt <-
+    paste0(
+      "The Smallset Timeline, explaining how the dataset is preprocessed, consists of ",
+      as.character(length(tables)),
+      " Smallset snapshots."
+    )
   return(txt)
 }
 
+#' Writes resume marker
+#' @description Writes about the resume marker.
+#' @noRd
+write_resumeMarker <- function(i, caption) {
+  txt <-
+    paste0("Between snapshots ",
+           i,
+           " and ",
+           i + 1,
+           ", there is a resume marker that says ",
+           caption,
+           ".")
+  return(txt)
+}

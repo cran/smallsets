@@ -1,7 +1,7 @@
 #' Prepare score sheet
 #' @description Prepares the coverage indicator matrix for automated Smallset
 #'   selection.
-#' @keywords internal
+#' @noRd
 
 prepare_score_sheet <-
   function(smallsetList,
@@ -19,8 +19,8 @@ prepare_score_sheet <-
     for (t in 1:length(tables[[1]])) {
       tab <- as.data.frame(tables[[1]][[t]]$body$styles$text$color$data)
       rownames(tab) <- rownames(tables[[1]][[t]]$body$dataset)
-      tab[tab != fourCols[1]] <- 1
-      tab[tab == fourCols[1]] <- 0
+      tab[tab != fourCols[4]] <- 1
+      tab[tab == fourCols[4]] <- 0
       tab[] <- lapply(tab, as.character)
       tab[] <- lapply(tab, as.numeric)
       tab$scoreSum <- rowSums(tab)
